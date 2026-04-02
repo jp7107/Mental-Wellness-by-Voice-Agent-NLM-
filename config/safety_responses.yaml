@@ -1,0 +1,62 @@
+# ============================================
+# MIND EASE — Safety Escalation Responses
+# ============================================
+# These are deterministic responses used when the mood tracker
+# detects sustained high-risk emotional states.
+# The LLM is BYPASSED when these are triggered.
+
+escalation:
+  cooldown_turns: 5             # Wait N turns before re-evaluating
+
+  responses:
+    - text: >
+        I hear you, and I want you to know that you're not alone in this.
+        What you're feeling is valid, and there are people who can help right now.
+      priority: 1
+
+    - text: >
+        It sounds like you're going through something really difficult.
+        Please know that support is available — you don't have to face this alone.
+      priority: 2
+
+    - text: >
+        I care about how you're feeling. Sometimes talking to a trained
+        professional can make a real difference. Would you like me to share
+        some resources?
+      priority: 3
+
+    - text: >
+        Your feelings matter, and so do you. If things feel overwhelming,
+        reaching out for help is a sign of strength, not weakness.
+      priority: 4
+
+    - text: >
+        I'm here with you. If you're in crisis or feel unsafe, please
+        reach out to a helpline — they're available 24/7 and ready to listen.
+      priority: 5
+
+  crisis_resources:
+    - name: "988 Suicide & Crisis Lifeline"
+      contact: "Call or text 988"
+      region: "US"
+
+    - name: "Crisis Text Line"
+      contact: "Text HOME to 741741"
+      region: "US"
+
+    - name: "iCall"
+      contact: "9152987821"
+      region: "India"
+
+    - name: "Vandrevala Foundation"
+      contact: "1860-2662-345"
+      region: "India"
+
+    - name: "Samaritans"
+      contact: "116 123"
+      region: "UK"
+
+  # Response shown when safety has been triggered and cooldown is active
+  cooldown_message: >
+    I'm still here with you. Remember, you can always reach out to
+    the support resources I shared earlier. How are you feeling now?

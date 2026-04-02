@@ -1,0 +1,75 @@
+# ============================================
+# MIND EASE — Pipeline Configuration
+# ============================================
+# All tunable parameters for the inference pipeline.
+# Modify to adjust latency/quality tradeoffs.
+
+audio:
+  sample_rate: 16000
+  chunk_duration_ms: 2000
+  channels: 1
+  bit_depth: 16
+  energy_threshold: 0.01        # Pre-filter silence (RMS)
+
+vad:
+  model: "silero_vad"
+  threshold: 0.5                # Speech probability threshold
+  min_speech_duration_ms: 250   # Ignore speech shorter than this
+  min_silence_duration_ms: 600  # Pause length to trigger pipeline
+  window_size_samples: 512
+
+stt:
+  model: "whisper-small"
+  language: "en"
+  beam_size: 1                  # Greedy decoding (fastest)
+  max_tokens: 120
+  threads: 4
+  translate: false
+
+emotion:
+  labels:
+    - calm
+    - sad
+    - anxious
+    - angry
+    - fearful
+    - distressed
+  confidence_threshold: 0.3     # Minimum confidence to report
+
+mood:
+  score_mapping:
+    calm: 1
+    sad: 2
+    anxious: 3
+    angry: 3
+    fearful: 4
+    distressed: 5
+  window_size: 3                # Rolling window of N turns
+  safety_threshold: 4.0         # Average score triggering escalation
+
+llm:
+  model: "phi-3-mini-4k-instruct"
+  max_tokens: 80
+  temperature: 0.7
+  top_p: 0.9
+  repeat_penalty: 1.1
+  threads: 4
+  system_prompt: >
+    You are a compassionate mental wellness companion named Mind Ease.
+    Respond with short, empathetic messages (1-2 sentences max).
+    Never give medical diagnosis or prescribe medication.
+    Acknowledge the user's emotions and offer gentle support.
+    Current emotion detected: {emotion_label} (confidence: {confidence}%)
+
+tts:
+  model: "kokoro-v0.19"
+  default_voice: "af_heart"
+  speed: 1.0
+  sample_rate: 24000
+
+engine:
+  whisper_threads: 4
+  onnx_threads: 2
+  llm_threads: 4
+  total_max_threads: 10
+  ipc_buffer_size: 65536        # 64KB IPC read buffer
