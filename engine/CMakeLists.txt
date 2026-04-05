@@ -116,7 +116,7 @@ endif()
 
 if(LLAMA_AVAILABLE)
     target_compile_definitions(mindease_engine PRIVATE HAS_LLAMA=1)
-    list(APPEND ENGINE_LIBS llama common)
+    list(APPEND ENGINE_LIBS llama)
 else()
     target_compile_definitions(mindease_engine PRIVATE HAS_LLAMA=0)
 endif()

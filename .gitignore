@@ -37,3 +37,4 @@ frontend/out/
 # --- Logs ---
 *.log
 logs/
+engine/.cache/

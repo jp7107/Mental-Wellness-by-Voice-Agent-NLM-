@@ -8,7 +8,7 @@
 #include <string>
 #include <vector>
 #include <array>
-#include <unordered_map>
+
 
 namespace mindease {
 
@@ -63,7 +63,7 @@ public:
 
 private:
     EmotionConfig config_;
-    void*         session_ = nullptr;  // OrtSession* (opaque)
+    [[maybe_unused]] void* session_ = nullptr;  // OrtSession* (opaque)
     bool          ready_ = false;
 
     std::vector<float> tokenize_and_encode(const std::string& text);

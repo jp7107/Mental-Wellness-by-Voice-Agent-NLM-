@@ -47,7 +47,7 @@ public:
 
 private:
     STTConfig config_;
-    void*     ctx_ = nullptr;   // whisper_context* (opaque)
+    [[maybe_unused]] void* ctx_ = nullptr;   // whisper_context* (opaque)
     bool      ready_ = false;
 };
 

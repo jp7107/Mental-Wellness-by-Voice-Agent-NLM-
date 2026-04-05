@@ -172,28 +172,16 @@ PipelineResult Pipeline::execute_pipeline(const std::vector<float>& speech_audio
     std::cerr << "[Pipeline] STT (" << result.transcription.duration_ms << "ms): "
               << result.transcription.text << "\n";
 
-    // ── Layer 3: Parallel Emotion + Mood ──
+    // ── Layer 3: Emotion Classification (async) ──
     auto emotion_future = std::async(std::launch::async, [&]() {
         return emotion_->classify(result.transcription.text);
     });
 
-    auto mood_future = std::async(std::launch::async, [&]() {
-        // Mood needs emotion result, but we can prepare
-        // For true parallelism, mood_tracker does its own lightweight text analysis
-        EmotionResult quick_emotion;
-        quick_emotion.primary_emotion = EmotionLabel::CALM;
-        quick_emotion.confidence = 0.5f;
-        return mood_->update(quick_emotion);
-    });
-
+    // Wait for emotion result
     result.emotion = emotion_future.get();
 
-    // Update mood with actual emotion result (refines the quick estimate)
-    // This is a fast O(1) operation, so no latency concern
+    // Update mood with actual emotion result
     result.mood = mood_->update(result.emotion);
-
-    // Discard the quick mood estimate from the future
-    mood_future.get();
 
     std::cerr << "[Pipeline] Emotion (" << result.emotion.duration_ms << "ms): "
               << EmotionClassifier::label_to_string(result.emotion.primary_emotion)

@@ -8,7 +8,6 @@
 #include <chrono>
 #include <iostream>
 #include <sstream>
-#include <algorithm>
 #include <cstdio>
 
 #if HAS_LLAMA
@@ -171,8 +170,9 @@ LLMResponse LLM::generate(
 
         const int max_input = 1024;
         std::vector<llama_token> tokens(max_input);
+        auto vocab = llama_model_get_vocab(model_ptr);
         int n_prompt_tokens = llama_tokenize(
-            model_ptr,
+            vocab,
             prompt.c_str(),
             static_cast<int>(prompt.size()),
             tokens.data(),
@@ -187,11 +187,16 @@ LLMResponse LLM::generate(
             tokens.resize(n_prompt_tokens);
             used_llama = true;
 
-            llama_kv_cache_clear(ctx_ptr);
+            llama_memory_clear(llama_get_memory(ctx_ptr), true);
 
             llama_batch batch = llama_batch_init(max_input, 0, 1);
             for (int i = 0; i < n_prompt_tokens; i++) {
-                llama_batch_add(batch, tokens[i], i, {0}, i == n_prompt_tokens - 1);
+                batch.token[batch.n_tokens] = tokens[i];
+                batch.pos[batch.n_tokens] = i;
+                batch.n_seq_id[batch.n_tokens] = 1;
+                batch.seq_id[batch.n_tokens][0] = 0;
+                batch.logits[batch.n_tokens] = (i == n_prompt_tokens - 1);
+                batch.n_tokens++;
             }
 
             if (llama_decode(ctx_ptr, batch) != 0) {
@@ -206,15 +211,17 @@ LLMResponse LLM::generate(
                 llama_sampler_chain_add(smpl, llama_sampler_init_temp(config_.temperature));
                 llama_sampler_chain_add(smpl, llama_sampler_init_top_p(config_.top_p, 1));
                 llama_sampler_chain_add(smpl, llama_sampler_init_dist(0));
+                
+                auto* vocab = llama_model_get_vocab(model_ptr);
 
                 while (n_gen < config_.max_tokens) {
                     llama_token new_token = llama_sampler_sample(smpl, ctx_ptr, -1);
 
-                    if (llama_token_is_eog(model_ptr, new_token)) break;
+                    if (llama_token_is_eog(vocab, new_token)) break;
 
                     char buf[256];
                     int piece_len = llama_token_to_piece(
-                        model_ptr, new_token, buf, sizeof(buf), 0, true
+                        vocab, new_token, buf, sizeof(buf), 0, true
                     );
                     if (piece_len > 0) {
                         std::string piece(buf, piece_len);
@@ -223,8 +230,14 @@ LLMResponse LLM::generate(
                         if (on_token) on_token(piece);
                     }
 
-                    llama_batch_clear(batch);
-                    llama_batch_add(batch, new_token, n_cur, {0}, true);
+                    batch.n_tokens = 0; // clear batch
+                    batch.token[batch.n_tokens] = new_token;
+                    batch.pos[batch.n_tokens] = n_cur;
+                    batch.n_seq_id[batch.n_tokens] = 1;
+                    batch.seq_id[batch.n_tokens][0] = 0;
+                    batch.logits[batch.n_tokens] = true;
+                    batch.n_tokens++;
+                    
                     n_cur++;
 
                     if (llama_decode(ctx_ptr, batch) != 0) {
@@ -269,7 +282,7 @@ bool LLM::is_ready() const {
 void LLM::reset_context() {
 #if HAS_LLAMA
     if (ctx_) {
-        llama_kv_cache_clear(static_cast<llama_context*>(ctx_));
+        llama_memory_clear(llama_get_memory(static_cast<llama_context*>(ctx_)), true);
     }
 #endif
 }

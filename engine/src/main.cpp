@@ -16,7 +16,6 @@
 
 #include "pipeline.hpp"
 #include <iostream>
-#include <fstream>
 #include <string>
 #include <cstring>
 
@@ -42,7 +41,7 @@ mindease::PipelineConfig build_default_config() {
     mindease::PipelineConfig config;
 
     // Default model paths (relative to project root)
-    config.whisper_model_path = "models/whisper-small-q4.bin";
+    config.whisper_model_path = "models/whisper-base.en.bin";
     config.emotion_model_path = "models/qwen2.5-emotion-lora/adapter_model.onnx";
     config.llm_model_path     = "models/phi-3-mini-4k-q4.gguf";
 
@@ -52,7 +51,7 @@ mindease::PipelineConfig build_default_config() {
     config.vad.min_silence_duration_ms = 600;
     config.vad.window_size_samples    = 512;
     config.vad.sample_rate            = 16000;
-    config.vad.energy_threshold       = 0.01f;
+    config.vad.energy_threshold       = 0.0005f; // Extremely sensitive to catch all mic input
 
     // STT defaults
     config.stt.model_path  = config.whisper_model_path;

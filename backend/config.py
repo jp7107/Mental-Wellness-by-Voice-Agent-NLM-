@@ -22,41 +22,34 @@ class Settings(BaseSettings):
 
     # Model paths
     whisper_model_path: str = Field(
-        default="models/whisper-small-q4.bin",
-        alias="WHISPER_MODEL_PATH"
+        default="models/whisper-small-q4.bin", alias="WHISPER_MODEL_PATH"
     )
     phi3_model_path: str = Field(
-        default="models/phi-3-mini-4k-q4.gguf",
-        alias="PHI3_MODEL_PATH"
+        default="models/phi-3-mini-4k-q4.gguf", alias="PHI3_MODEL_PATH"
     )
     emotion_model_path: str = Field(
         default="models/qwen2.5-emotion-lora/adapter_model.onnx",
-        alias="EMOTION_MODEL_PATH"
+        alias="EMOTION_MODEL_PATH",
     )
     kokoro_model_path: str = Field(
-        default="models/kokoro-v0.19/kokoro-v0_19.onnx",
-        alias="KOKORO_MODEL_PATH"
+        default="models/kokoro-v0.19/kokoro-v0_19.onnx", alias="KOKORO_MODEL_PATH"
     )
     kokoro_voices_path: str = Field(
-        default="models/kokoro-v0.19/voices",
-        alias="KOKORO_VOICES_PATH"
+        default="models/kokoro-v0.19/voices", alias="KOKORO_VOICES_PATH"
     )
 
     # Engine
     engine_binary_path: str = Field(
-        default="engine/build/mindease_engine",
-        alias="ENGINE_BINARY_PATH"
+        default="engine/build/mindease_engine", alias="ENGINE_BINARY_PATH"
     )
     engine_log_level: str = Field(default="warn", alias="ENGINE_LOG_LEVEL")
 
     # Config files
     pipeline_config_path: str = Field(
-        default="config/pipeline.yaml",
-        alias="PIPELINE_CONFIG_PATH"
+        default="config/pipeline.yaml", alias="PIPELINE_CONFIG_PATH"
     )
     safety_config_path: str = Field(
-        default="config/safety_responses.yaml",
-        alias="SAFETY_CONFIG_PATH"
+        default="config/safety_responses.yaml", alias="SAFETY_CONFIG_PATH"
     )
 
     def resolve_path(self, relative_path: str) -> Path:
@@ -70,6 +63,7 @@ class Settings(BaseSettings):
         env_file = str(PROJECT_ROOT / ".env")
         env_file_encoding = "utf-8"
         populate_by_name = True
+        extra = "ignore"
 
 
 # Singleton instance

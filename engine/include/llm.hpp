@@ -6,7 +6,6 @@
 // Hard-capped at 80 tokens with emotion-aware system prompt.
 
 #include <string>
-#include <vector>
 #include <functional>
 #include "emotion.hpp"
 
@@ -65,8 +64,8 @@ public:
 
 private:
     LLMConfig config_;
-    void*     model_ = nullptr;     // llama_model* (opaque)
-    void*     ctx_   = nullptr;     // llama_context* (opaque)
+    [[maybe_unused]] void* model_ = nullptr;     // llama_model* (opaque)
+    [[maybe_unused]] void* ctx_   = nullptr;     // llama_context* (opaque)
     bool      ready_ = false;
 
     std::string build_prompt(
